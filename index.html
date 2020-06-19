@@ -24,7 +24,6 @@ canvas {
 <button id="startVideo">开始录制</button>
 <button id="endVideo">结束录制</button>
 <button id="myButton">截图</button>
-<button id="myButton2">预览</button>
 <button id="myButton3">
 <a download="video.png">另存为</a>
 </button>
@@ -81,9 +80,6 @@ canvas {
 		document.getElementById('myButton').addEventListener('click',function(){
 			cobj.drawImage(vobj,0,0,640,480);
 			document.getElementById('myButton3').children[0].href=cobj.canvas.toDataURL("image/png");
-		},false);
-		document.getElementById('myButton2').addEventListener('click',function(){
-			window.open(cobj.canvas.toDataURL("image/png"),'_blank');
 		},false);
 		
 	},false);
