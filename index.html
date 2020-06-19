@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+video {
+ border: 1px solid #ccc;
+ display: block;
+ margin: 0 0 20px 0;
+ float:left;
+}
+canvas {
+ margin-top: 20px;
+ border: 1px solid #ccc;
+ display: block;
+}
+</style>
+</head>
+<body>
+<video width="640" height="480" id="myVideo"></video>
+<canvas width="640" height="480" id="myCanvas"></canvas>
+
+<button id="startVideo">开始录制</button>
+<button id="endVideo">结束录制</button>
+<button id="myButton">截图</button>
+<button id="myButton2">预览</button>
+<button id="myButton3">
+<a download="video.png">另存为</a>
+</button>
+</body>
+<script>
+	window.addEventListener('DOMContentLoaded',function(){
+		var cobj=document.getElementById('myCanvas').getContext('2d');
+		var vobj=document.getElementById('myVideo');
+		getUserMedia({video:true,audio:true},function(stream){
+			console.log(stream)
+			 // vobj.src=stream;
+			try {
+				vobj.srcObject = stream;
+			} catch (e) {
+				try {
+					vobj.src = URL.createObjectURL(stream);
+				} catch (e) {
+					console.error("Error attaching stream to element");
+				}
+			}
+			 
+			vobj.play();
+			 
+			let options = {
+					audioBitsPerSecond : 128000,  // 音频码率
+					videoBitsPerSecond : 100000,  // 视频码率
+					mimeType:'video/webm;codecs=h264'
+				}
+			let localMediaRecorder = new MediaRecorder(stream, options)
+			 
+			 document.getElementById("startVideo").addEventListener("click",function(){
+				  // 开始采集
+				    localMediaRecorder.start()
+				    console.log('开始采集')
+			 })
+			
+			document.getElementById("endVideo").addEventListener("click",function(){
+				// 停止采集
+				  localMediaRecorder.stop()
+				  console.log('停止采集')
+			})
+			   // 事件
+			localMediaRecorder.ondataavailable = function (e) {
+			     console.log(e)
+			     // 下载视频
+			     var blob = new Blob([e.data], { 'type' : 'video/mp4' })
+			     let a = document.createElement('a')
+			     a.href = URL.createObjectURL(blob)
+			     a.download = `test.mp4`
+			     a.click()
+			}
+		},function(){});
+		
+		document.getElementById('myButton').addEventListener('click',function(){
+			cobj.drawImage(vobj,0,0,640,480);
+			document.getElementById('myButton3').children[0].href=cobj.canvas.toDataURL("image/png");
+		},false);
+		document.getElementById('myButton2').addEventListener('click',function(){
+			window.open(cobj.canvas.toDataURL("image/png"),'_blank');
+		},false);
+		
+	},false);
+
+
+
+	function getUserMedia(obj,success,error){
+		if(navigator.getUserMedia){
+			getUserMedia=function(obj,success,error){
+				navigator.getUserMedia(obj,function(stream){
+					success(stream);
+				},error);
+			}
+		}else if(navigator.webkitGetUserMedia){
+			getUserMedia=function(obj,success,error){
+				navigator.webkitGetUserMedia(obj,function(stream){
+					var _URL=window.URL || window.webkitURL;
+					success(_URL.createObjectURL(stream));
+				},error);
+			}
+		}else if(navigator.mozGetUserMedia){
+			getUserMedia=function(obj,success,error){
+				navigator.mozGetUserMedia(obj,function(stream){
+					success(window.URL.createObjectURL(stream));
+				},error);
+			}
+		}else{
+			return false;
+		}
+		return getUserMedia(obj,success,error);
+	}
+</script>
+</html>
+
